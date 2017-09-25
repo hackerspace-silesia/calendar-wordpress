@@ -56,7 +56,7 @@ function create_post_type()
             'menu_icon' => 'dashicons-calendar-alt',
             'hierarchical' => true,
             'supports' => array(
-                'title', 'editor', 'thumbnail', 'custom-fields'
+                'title', 'editor', 'thumbnail', 'revisions', 'comments'
             ),
             'taxonomies' => array(
                 'category', 'post_tag'
@@ -185,10 +185,48 @@ function calendar_save_postdata($post_id)
 }
 add_action('save_post', 'calendar_save_postdata');
 
+/*
 function query_post_type($query) {
     // @TODO: do przemyślenia jakieś lepsze rozwiązanie
     if($query->get('post_type') == 'post'){
         $query->set('post_type', array('post', 'calendar_event'));
     }
 }
+add_filter('pre_get_posts', 'query_post_type');*/
+
+function query_post_type($query) {
+    if( $query->is_main_query() && !is_admin() ){
+        add_leaflet();
+        $query->set( 'post_type', array( 'post', 'calendar_event' ) );
+        $query->set( 'posts_per_page', 1000 );
+        return $query;
+    }
+    if( $query->is_archive() && !is_admin() ) {
+        add_leaflet();
+        $query->set( 'post_type', array( 'post', 'calendar_event' ) );
+        return $query;
+    }
+    if( $query->is_single() && !is_admin() ) {
+        add_leaflet();
+        $query->set( 'post_type', array( 'post', 'calendar_event' ) );
+        return $query;
+    }
+    return $query;
+}
 add_filter('pre_get_posts', 'query_post_type');
+
+function add_leaflet() {
+    wp_enqueue_style( 'leaflet-css' , plugins_url('/assets/css/leaflet.css', __FILE__ ));
+    wp_enqueue_style( 'wp-calendarevents-css' , plugins_url('/assets/css/style.css', __FILE__ ));
+    wp_enqueue_script( 'leaflet-js', plugins_url('/assets/js/leaflet.js', __FILE__ ));
+    wp_enqueue_script( 'leaflet-color-markers-js', plugins_url('/assets/js/leaflet-color-markers.js', __FILE__ ));
+}
+
+add_filter('the_content', 'add_tags_to_content');
+function add_tags_to_content($content){
+    //$tags = get_the_tags();
+    if ( get_the_tag_list() ) $content .= '<div class="tagi"><p>Tagi: '.get_the_tag_list('',', ').'</p></div>';
+    if ( get_the_category() ) $content .= '<div class="categories"><p>Kategorie: '.get_the_category_list(', ').'</p></div>';
+    return $content;
+    //return 'przed'.$content.'po';
+}
