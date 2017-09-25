@@ -125,7 +125,7 @@ function metadata_metabox_location_html($post)
             document.getElementById('location_lat').value = position.lat;
             document.getElementById('location_lon').value = position.lng;
             //marker.setLatLng(new L.LatLng(position.lat, position.lng),{draggable:'true'});
-            //map.panTo(new L.LatLng(position.lat, position.lng))
+            mymap.panTo(new L.LatLng(position.lat, position.lng))
         });
     </script>
     <?php
