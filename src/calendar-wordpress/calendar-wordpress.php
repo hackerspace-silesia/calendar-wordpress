@@ -17,6 +17,10 @@ require_once 'lib/calendar-event.php';
 require_once 'lib/location.php';
 require_once 'lib/host.php';
 
+include 'config.php';
+
+//include 'dziejesie-options.php';
+
 function extra_admin_styles() {
     // @TODO: ładować tylko niezbędne
     wp_enqueue_style( 'wp-jquery-datetime-picker-css' , plugins_url('/assets/css/jquery.datetimepicker.css', __FILE__ ));

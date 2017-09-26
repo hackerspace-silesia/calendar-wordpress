@@ -82,6 +82,9 @@ add_action('add_meta_boxes', 'create_metabox_location');
 function metadata_metabox_location_html($post)
 {
     wp_nonce_field('location_metabox_html', 'location_metabox_html_nonce');
+    $options = get_option('dziejesie_option',array());
+    // @TODO: sprawdzić czy użytkownik wpisał klucz API i domyślną lokalizację;
+    // jeśli nie - wyświetlić odpowiedni komunikat
     ?>
     <div id="map-location" style="height: 400px; width: 600px; float: left;"></div>
     <div class="metabox_right" style="float:right; width: 50%; text-align: right">
@@ -107,14 +110,14 @@ function metadata_metabox_location_html($post)
         <?php if(get_post_meta( $post->ID, '_location_lon', true ) && get_post_meta( $post->ID, '_location_lat', true )): ?>
         var position = L.latLng(<?php echo get_post_meta( $post->ID, '_location_lat', true );?>, <?php echo get_post_meta( $post->ID, '_location_lon', true ); ?>);
         <?php else: ?>
-        var position = L.latLng(50.856215819093094, 19.94619369506836);    
+        var position = L.latLng(<?php echo $options['default_location']; ?>);
         <?php endif; ?>
         var mymap = L.map('map-location').setView(position, 13); //50.856215819093094, 19.94619369506836
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
             maxZoom: 18,
             id: 'mapbox.streets',
-            accessToken: 'pk.eyJ1IjoiYmFydG5pa2oiLCJhIjoiY2o1a3JoYnNvMm1vMzMzbnoxNnFoamFrcyJ9.37uf-5-t9gZhlkL4wQx3Lw'
+            accessToken: '<?php echo $options['leaflet_API']; ?>'
         }).addTo(mymap);
         var marker = L.marker(position,{draggable:'true'}).addTo(mymap);
         
