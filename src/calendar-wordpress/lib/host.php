@@ -98,7 +98,7 @@ function metadata_metabox_host_html($post)
             <select name="locationalias" id="locationalias">
             <?php
             //global $location;
-            $args = array( 'post_type' => 'location' );
+            $args = array( 'post_type' => 'location', 'nopaging' => true );
             $locations = get_posts( $args );
             foreach ( $locations as $location ) :
             ?>

@@ -103,7 +103,7 @@ function metadata_metabox_html($post)
             <select name="organisedby" id="organisedby">
             <?php
             //global $location;
-            $args = array( 'post_type' => 'host' );
+            $args = array( 'post_type' => 'host', 'nopaging' => true );
             $hosts = get_posts( $args );
             foreach ( $hosts as $host ) :
             ?>
@@ -118,7 +118,7 @@ function metadata_metabox_html($post)
             <select name="locationalias" id="locationalias">
             <?php
             //global $location;
-            $args = array( 'post_type' => 'location' );
+            $args = array( 'post_type' => 'location', 'nopaging' => true );
             $locations = get_posts( $args );
             foreach ( $locations as $location ) :
             ?>
@@ -189,6 +189,7 @@ function query_post_type($query) {
     if( $query->is_main_query() && !is_admin() ){
         add_leaflet();
         $query->set( 'post_type', array( 'post', 'calendar_event' ) );
+        // TODO: a może jednak paginacja?
         $query->set( 'posts_per_page', 1000 );
         return $query;
     }
@@ -216,18 +217,95 @@ function add_leaflet() {
 add_filter('the_content', 'add_tags_to_content');
 function add_tags_to_content($content){
     //$tags = get_the_tags();
-    if ( get_the_post_meta('_event_start') ) {
+    // stara wersja "po kontencie"
+    /*if ( get_the_post_meta('_event_start') ) {
         $content .= '<div class="time"><p>Czas wydarzenia: '.get_the_post_meta('_event_start');
         if (get_the_post_meta('_event_stop')) $content .= ' do '. get_the_post_meta('_event_stop');
         $content .= '</p></div>';
+    }*/
+    if ( get_the_post_meta('_event_start') ) {
+        $content = '<div class="time"><p>Czas wydarzenia: '.get_the_post_meta('_event_start').
+                (get_the_post_meta('_event_stop')?' do '. get_the_post_meta('_event_stop').'</p></div>':'').$content;
     }
-    if ( get_the_tag_list() ) $content .= '<div class="tagi"><p>Tagi: '.get_the_tag_list('',', ').'</p></div>';
-    if ( get_the_category() ) $content .= '<div class="categories"><p>Kategorie: '.get_the_category_list(', ').'</p></div>';
-    if ( get_the_post_meta('_event_link') )
+    if ( get_the_tag_list() ) {$content .= '<div class="tagi"><p>Tagi: '.get_the_tag_list('',', ').'</p></div>';}
+    if ( get_the_category() ) {$content .= '<div class="categories"><p>Kategorie: '.get_the_category_list(', ').'</p></div>';}
+    if ( get_the_post_meta('_event_link') ) {
         $content .= '<div class="source"><p>Źródło: <a href="'.get_the_post_meta('_event_link').'" target="_blank" >'.get_the_post_meta('_event_link').'</a></p></div>';
+    }
     return $content;
 }
 
 function get_the_post_meta($key){
     return get_post_meta( get_the_ID(), $key, true);
+}
+
+function add_custom_columns( $columns ){
+    //TODO: tylko dla eventów
+    return array_merge ( $columns,
+    array(
+        // @TODO: nie ma lepszej metody na sortowalne kolumny?
+        'event_start' => '<a href="'.admin_url().'edit.php?post_type=calendar_event&orderby=event_start">Początek</a>',
+        'event_stop' => '<a href="'.admin_url().'edit.php?post_type=calendar_event&orderby=event_stop">Koniec</a>',
+    ));
+}
+add_filter('manage_calendar_event_posts_columns' , 'add_custom_columns');
+
+add_action( 'manage_calendar_event_posts_custom_column' , 'custom_columns', 10, 2 );
+function custom_columns( $column, $post_id ) {
+    switch ( $column ) {
+        case 'event_start':
+            echo get_post_meta( $post_id, '_event_start', true ); 
+            break;
+        case 'event_stop':
+            echo get_post_meta( $post_id, '_event_stop', true ); 
+            break;
+    }
+}
+
+add_filter( 'manage_calendar_event_sortable_columns', 'sortable_columns' );
+function sortable_columns( $columns ) {
+    $columns['event_start'] = 'event_start';
+    $columns['event_stop'] = 'event_stop';
+ 
+    //To make a column 'un-sortable' remove it from the array
+    //unset($columns['date']);
+ 
+    return $columns;
+}
+
+add_action( 'pre_get_posts', 'columns_orderby' );
+function columns_orderby( $query ) {
+    if( ! is_admin() )
+        return;
+ 
+    $orderby = $query->get( 'orderby');
+ 
+    if( 'event_start' == $orderby ) {
+        $query->set('meta_key','_event_start');
+        $query->set('orderby','meta_value');
+    }
+    
+    if( 'event_stop' == $orderby ) {
+        $query->set('meta_key','_event_stop');
+        $query->set('orderby','meta_value');
+    }
+}
+
+add_action( 'pre_get_posts', 'posts_orderby' );
+function posts_orderby( $query ) {
+    if( is_admin() )
+        return;
+ 
+    // sortowanie po dacie
+    $query->set('meta_key','_event_start');
+    $query->set('orderby','meta_value');
+    $query->set('order','ASC');
+    
+    // tylko wydarzenia kończące się po "dzisiaj"
+    $today = date( 'Y/m/d 23:59' );
+    $query->set('meta_query', array( array(
+        'key' => '_event_stop',
+        'value' => $today,
+        'compare' => '>=',
+    )));
 }
