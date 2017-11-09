@@ -86,22 +86,30 @@ function metadata_metabox_location_html($post)
     // @TODO: sprawdzić czy użytkownik wpisał klucz API i domyślną lokalizację;
     // jeśli nie - wyświetlić odpowiedni komunikat
     ?>
-    <div id="map-location" style="height: 400px; width: 600px; float: left;"></div>
-    <div class="metabox_right" style="float:right; width: 50%; text-align: right">
+    <div id="map-location" style="height: 400px; width: 100%; float: left;"></div>
+    <div class="metabox_right" style="float:right; width: 100%; text-align: right">
         <div>
-            <label for="location_alias">Alias lokalizacji: </label>
+            <label for="location_alias">Alias lokalizacji</label>
             <input type="text" id="location_alias" name="location_alias" value="<?php echo get_post_meta( $post->ID, '_location_alias', true ); ?>" />
         </div>
         <div>
-            <label for="location_url">Strona WWW lokalizacji: </label>
+            <label for="location_url">Adres (ulica)</label>
+            <input type="text" id="location_address" name="location_address" value="<?php echo get_post_meta( $post->ID, '_location_address', true ); ?>" />
+        </div>
+        <div>
+            <label for="location_url">Adres (miejscowość)</label>
+            <input type="text" id="location_address_city" name="location_address_city" value="<?php echo get_post_meta( $post->ID, '_location_address_city', true ); ?>" />
+        </div>
+        <div>
+            <label for="location_url">Strona WWW lokalizacji</label>
             <input type="text" id="location_url" name="location_url" value="<?php echo get_post_meta( $post->ID, '_location_url', true ); ?>" />
         </div>
         <div>
-            <label for="location_lat">Lat: </label>
+            <label for="location_lat">Lat</label>
             <input type="text" id="location_lat" name="location_lat" readonly="true" value="<?php echo get_post_meta( $post->ID, '_location_lat', true ); ?>" />
         </div>
         <div>
-            <label for="location_lan">Lon: </label>
+            <label for="location_lan">Lon</label>
             <input type="text" id="location_lon" name="location_lon" readonly="true" value="<?php echo get_post_meta( $post->ID, '_location_lon', true ); ?>" />
         </div>
     </div>
@@ -172,6 +180,16 @@ function location_save_postdata($post_id)
     if(isset($_POST['location_lat'])){
         $mydata = sanitize_text_field( $_POST['location_lat'] );
         update_post_meta( $post_id, '_location_lat', $mydata );
+    }
+    
+    if(isset($_POST['location_address'])){
+        $mydata = sanitize_text_field( $_POST['location_address'] );
+        update_post_meta( $post_id, '_location_address', $mydata );
+    }
+    
+    if(isset($_POST['location_address_city'])){
+        $mydata = sanitize_text_field( $_POST['location_address_city'] );
+        update_post_meta( $post_id, '_location_address_city', $mydata );
     }
 
 }

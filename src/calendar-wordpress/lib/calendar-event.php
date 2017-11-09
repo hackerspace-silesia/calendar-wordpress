@@ -193,12 +193,12 @@ function query_post_type($query) {
         $query->set( 'posts_per_page', 1000 );
         return $query;
     }
-    if( $query->is_archive() && !is_admin() ) {
+    if( $query->is_main_query() && $query->is_archive() && !is_admin() ) {
         add_leaflet();
         $query->set( 'post_type', array( 'post', 'calendar_event' ) );
         return $query;
     }
-    if( $query->is_single() && !is_admin() ) {
+    if( $query->is_main_query() && $query->is_single() && !is_admin() ) {
         add_leaflet();
         $query->set( 'post_type', array( 'post', 'calendar_event' ) );
         return $query;
@@ -227,10 +227,35 @@ function add_tags_to_content($content){
         $content = '<div class="time"><p>Czas wydarzenia: '.get_the_post_meta('_event_start').
                 (get_the_post_meta('_event_stop')?' do '. get_the_post_meta('_event_stop').'</p></div>':'').$content;
     }
-    if ( get_the_tag_list() ) {$content .= '<div class="tagi"><p>Tagi: '.get_the_tag_list('',', ').'</p></div>';}
-    if ( get_the_category() ) {$content .= '<div class="categories"><p>Kategorie: '.get_the_category_list(', ').'</p></div>';}
+    if ( get_the_tag_list() ) {$content .= '<div class="tagi"><p>Tagi:<br/>'.get_the_tag_list('',', ').'</p></div>';}
+    if ( get_the_category() ) {$content .= '<div class="categories"><p>Kategorie:<br/>'.get_the_category_list(', ').'</p></div>';}
     if ( get_the_post_meta('_event_link') ) {
-        $content .= '<div class="source"><p>Źródło: <a href="'.get_the_post_meta('_event_link').'" target="_blank" >'.get_the_post_meta('_event_link').'</a></p></div>';
+        $content .= '<div class="source"><p>Źródło:<br/><a href="'.get_the_post_meta('_event_link').'" target="_blank" >'.get_the_post_meta('_event_link').'</a></p></div>';
+    }
+    
+    if ( get_the_post_meta('_locationalias') ) {
+        $locID = get_the_post_meta('_locationalias');
+        $content .= '<div class="location"><p>Lokacja:';
+        $content .= '<br/>'. get_the_title($locID);
+        if ( get_post_meta($locID,'_location_address',true) ) { $content .= '<br/>'.get_post_meta($locID,'_location_address',true); }
+        if ( get_post_meta($locID,'_location_address_city',true) ) { $content .= '<br/>'.get_post_meta($locID,'_location_address_city',true); }
+        //$content .= '<br/>'.get_post_meta($locID,'_location_lat',true).', '. get_post_meta($locID,'_location_lon',true);
+        $content .= '<br/><a rel="lightbox" target="_blank" href="https://www.openstreetmap.org/?mlat='.get_post_meta($locID,'_location_lat',true).'&mlon='.get_post_meta($locID,'_location_lon',true).'&zoom=18">Zobacz na mapie</a>';
+        $content .= '</p></div>';
+    }
+    
+    //test
+    //if( $query->is_main_query() && $query->is_single() && !is_admin() ) {
+        //$content .= the_post_thumbnail('medium_large');
+    //}
+    
+    if ( get_the_post_meta('_organisedby') ) {
+        $orgID = get_the_post_meta('_organisedby');
+        $content .= '<div class="organisedby"><p>Organizator:<br/>';
+        if ( get_post_meta($orgID,'_host_url',true) ) { $content .= '<a href="'.get_post_meta($orgID,'_host_url',true).'">'; }
+        $content .= get_the_title($orgID);
+        if ( get_post_meta($orgID,'_host_url',true) ) { $content .= '</a>'; }
+        $content .= '</p></div>';
     }
     return $content;
 }
@@ -293,7 +318,7 @@ function columns_orderby( $query ) {
 
 add_action( 'pre_get_posts', 'posts_orderby' );
 function posts_orderby( $query ) {
-    if( is_admin() )
+    if( is_admin() || !is_main_query())
         return;
  
     // sortowanie po dacie
@@ -308,4 +333,20 @@ function posts_orderby( $query ) {
         'value' => $today,
         'compare' => '>=',
     )));
+}
+
+/* funkcja zamienia obcięte miniatury plakatów z artykułów na pełne;
+ * wypadałoby się zastanowić, czy nie pytać o to użytkownika (wstawić w opcje wtyczki)
+ * albo/i robić to tylko dla pojedynczego artykułu
+ */
+add_filter('post_thumbnail_html', 'modify_post_thumbnail_html', 99, 5);
+function modify_post_thumbnail_html($html, $post_id, $post_thumbnail_id, $size, $attr) {
+    $id = get_post_thumbnail_id();
+    $src = wp_get_attachment_image_src($id, 'medium_large');
+    $alt = get_the_title($id);
+    $class = $attr['class'];
+
+    $html = '<img src="' . $src[0] . '" alt="' . $alt . '" class="' . $class . '" />';
+
+    return $html;
 }
