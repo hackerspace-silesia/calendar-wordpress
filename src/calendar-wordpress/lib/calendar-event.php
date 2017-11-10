@@ -114,6 +114,10 @@ function metadata_metabox_html($post)
             </select>
         </div>
         <div>
+            <label for="event_price">Cena biletu: </label>
+            <input type="text" id="event_price" name="event_price" value="<?php echo get_post_meta( $post->ID, '_event_price', true ); ?>" />
+        </div>
+        <div>
             <label for="locationalias">Nazwa lokalizacji: </label>
             <select name="locationalias" id="locationalias">
             <?php
@@ -181,6 +185,11 @@ function calendar_save_postdata($post_id)
     if(isset($_POST['organisedbyurl'])){
         $mydata = sanitize_text_field($_POST['organisedbyurl']);
         update_post_meta($post_id, '_organisedbyurl', $mydata);
+    }
+    
+    if(isset($_POST['event_price'])){
+        $mydata = sanitize_text_field($_POST['event_price']);
+        update_post_meta($post_id, '_event_price', $mydata);
     }
 }
 add_action('save_post', 'calendar_save_postdata');
@@ -257,6 +266,11 @@ function add_tags_to_content($content){
         if ( get_post_meta($orgID,'_host_url',true) ) { $content .= '</a>'; }
         $content .= '</p></div>';
     }
+    
+    if ( get_the_post_meta('_event_price') > 0 ) {
+        $content .= '<div class="price"><p>Cena biletu:<br/>'.get_the_post_meta('_event_price').' PLN</p></div>';
+    }
+    
     return $content;
 }
 
