@@ -191,6 +191,7 @@ function calendar_save_postdata($post_id)
         $mydata = sanitize_text_field($_POST['event_price']);
         update_post_meta($post_id, '_event_price', $mydata);
     }
+    
 }
 add_action('save_post', 'calendar_save_postdata');
 
@@ -363,4 +364,48 @@ function modify_post_thumbnail_html($html, $post_id, $post_thumbnail_id, $size, 
     $html = '<img src="' . $src[0] . '" alt="' . $alt . '" class="' . $class . '" />';
 
     return $html;
+}
+
+add_filter('the_content', 'add_structured_data_to_content', 5);
+function add_structured_data_to_content($content){
+    ?>
+    <script type="application/ld+json">
+        {
+            "@context": "http://schema.org",
+            "@type": "Event",
+            "name": "<?php echo get_the_title(); ?>",
+            "startDate": "<?php echo get_the_post_meta('_event_start'); ?>",
+            "endDate": "<?php echo get_the_post_meta('_event_stop'); ?>",
+            "location": {
+                "@type": "Place",
+                "address": {
+                  "@type": "PostalAddress",
+                  "addressLocality": "<?php $locID = get_the_post_meta('_locationalias'); echo get_post_meta($locID,'_location_address_city',true);?>",
+                  //"addressRegion": "CO",
+                  //"postalCode": "80209",
+                  "streetAddress": "<?php echo get_post_meta($locID,'_location_address',true);?>"
+                },
+                "name": "<?php $orgID = get_the_post_meta('_organisedby'); echo get_the_title($orgID); ?>"
+            },
+            "description": "<?php echo htmlspecialchars(strip_tags($content)); ?>",
+            "image": "<?php $img = wp_get_attachment_image_src(get_post_thumbnail_id(), 'large'); echo $img[0];?>"
+            /* //@TODO
+            "performer": {
+              "@type": "PerformingGroup", //lub "Person"
+              "name": "Ktośtam"
+            },*/
+            <?php if(get_the_post_meta('_event_price') != '') : ?>
+            ,"offers": {
+              "@type": "Offer",
+              "price": "<?php echo get_the_post_meta('_event_price'); ?>",
+              "priceCurrency": "PLN",
+              "availability": "http://schema.org/InStock" 
+              //"validFrom": "2017-01-20T16:20-08:00",
+              //"url": "https://example.com"
+            }
+            <?php endif; ?>
+        }
+    </script>
+    <?php
+    return $content;
 }
