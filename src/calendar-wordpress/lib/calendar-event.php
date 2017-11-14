@@ -83,7 +83,10 @@ function metadata_metabox_html($post)
 {
     wp_nonce_field('calendar_metabox_html', 'calendar_metabox_html_nonce');
     $locationalias = get_post_meta($post->ID, '_locationalias', true);
-    $organisedby= get_post_meta($post->ID, '_organisedby', true);
+    $organisedby = get_post_meta($post->ID, '_organisedby', true);
+    $price_availability = get_post_meta($post->ID, '_price_available', true);
+    $performer_type = get_post_meta($post->ID, '_performer_type', true);
+    //print_r($performer_type); //die();
     ?>
     <div class="metabox">
         <div>
@@ -118,6 +121,15 @@ function metadata_metabox_html($post)
             <input type="text" id="event_price" name="event_price" value="<?php echo get_post_meta( $post->ID, '_event_price', true ); ?>" />
         </div>
         <div>
+            <label for="price_available">Dostępność biletów/wejściówek: </label>
+            <select name="price_available" id="price_available">
+                <option value="InStock" <?php selected($price_availability, 'InStock'); ?> >Dostępne</option>
+                <option value="SoldOut" <?php selected($price_availability, 'SoldOut'); ?> >Niedostępne</option>
+                <option value="PreOrder" <?php selected($price_availability, 'PreOrder'); ?> >Przedsprzedaż</option>
+                <option value="null" <?php selected($price_availability, 'null'); ?> >- nie pokazuj informacji -</option>
+            </select>
+        </div>
+        <div>
             <label for="locationalias">Nazwa lokalizacji: </label>
             <select name="locationalias" id="locationalias">
             <?php
@@ -131,6 +143,49 @@ function metadata_metabox_html($post)
             wp_reset_postdata();
             ?>
             </select>
+        </div>
+        <div>
+            <label>Wykonawcy: </label>
+            <div id="performers">
+            <?php foreach ($performer_type as $key => $type): ?>
+            <div class="performer">
+                <select name="performer_type[]" class="performer_type">
+                    <option value="null" <?php selected($type, 'null'); ?> >---</option>
+                    <option value="MusicGroup" <?php selected($type, 'MusicGroup'); ?> >Muzyka</option>
+                    <option value="DanceGroup" <?php selected($type, 'DanceGroup'); ?> >Taniec</option>
+                    <option value="TheaterGroup" <?php selected($type, 'TheaterGroup'); ?> >Teatr</option>
+                    <option value="Person" <?php selected($type, 'Person'); ?> >Inni</option>
+                </select>
+                <input type="text" class="performer_name" name="performer_name[]" value="<?php $pn = get_post_meta( $post->ID, '_performer_name', true ); echo $pn[$key]; ?>" />
+                <a href="#" onclick="return deleteParentDiv(this);">Usuń powyższego wykonawcę</a>
+            </div>
+            <?php endforeach; ?>
+            </div>
+            <div id="addPerformer">
+                <a href="#" onclick="return addPerformer();">Dodaj nowego wykonawcę</a>
+                <script>
+                    function addPerformer(){
+                        jQuery('#performers').append(`
+                        <div class="performer">    
+                            <select name="performer_type[]" class="performer_type">
+                                <option value="null">---</option>
+                                <option value="MusicGroup">Muzyka</option>
+                                <option value="DanceGroup">Taniec</option>
+                                <option value="TheaterGroup">Teatr</option>
+                                <option value="Person">Inni</option>
+                            </select>
+                            <input type="text" class="performer_name" name="performer_name[]" />
+                            <a href="#" onclick="return deleteParentDiv(this);">Usuń powyższego wykonawcę</a>
+                        </div>        
+                        `);
+                        return false;
+                    }
+                    function deleteParentDiv(s){
+                        jQuery(s).parent().remove();
+                        return false;
+                    }
+                </script>
+            </div>
         </div>
     </div>
     <div class="cleardiv" style="clear:both"></div>
@@ -190,6 +245,26 @@ function calendar_save_postdata($post_id)
     if(isset($_POST['event_price'])){
         $mydata = sanitize_text_field($_POST['event_price']);
         update_post_meta($post_id, '_event_price', $mydata);
+    }
+    
+    if(isset($_POST['price_available'])){
+        $mydata = sanitize_text_field($_POST['price_available']);
+        update_post_meta($post_id, '_price_available', $mydata);
+    }
+    
+    if(isset($_POST['performer_type'])){
+        $mydata = array_map( 'sanitize_text_field', $_POST['performer_type'] );
+        update_post_meta($post_id, '_performer_type', $mydata);
+    }
+    
+    if(isset($_POST['performer_name'])){
+        $mydata = array_map( 'sanitize_text_field', $_POST['performer_name'] );
+        update_post_meta($post_id, '_performer_name', $mydata);
+    }
+    
+    if(empty($_POST['performer_type'])){
+        update_post_meta($post_id, '_performer_type', null);
+        update_post_meta($post_id, '_performer_name', null);
     }
     
 }
@@ -254,11 +329,6 @@ function add_tags_to_content($content){
         $content .= '</p></div>';
     }
     
-    //test
-    //if( $query->is_main_query() && $query->is_single() && !is_admin() ) {
-        //$content .= the_post_thumbnail('medium_large');
-    //}
-    
     if ( get_the_post_meta('_organisedby') ) {
         $orgID = get_the_post_meta('_organisedby');
         $content .= '<div class="organisedby"><p>Organizator:<br/>';
@@ -271,6 +341,8 @@ function add_tags_to_content($content){
     if ( get_the_post_meta('_event_price') > 0 ) {
         $content .= '<div class="price"><p>Cena biletu:<br/>'.get_the_post_meta('_event_price').' PLN</p></div>';
     }
+    
+    /* @TODO: wykonawcy */
     
     return $content;
 }
@@ -389,7 +461,7 @@ function add_structured_data_to_content($content){
             },
             "description": "<?php echo htmlspecialchars(strip_tags($content)); ?>",
             "image": "<?php $img = wp_get_attachment_image_src(get_post_thumbnail_id(), 'large'); echo $img[0];?>"
-            /* //@TODO
+            /* @TODO: wykonawcy *//*
             "performer": {
               "@type": "PerformingGroup", //lub "Person"
               "name": "Ktośtam"
@@ -398,8 +470,8 @@ function add_structured_data_to_content($content){
             ,"offers": {
               "@type": "Offer",
               "price": "<?php echo get_the_post_meta('_event_price'); ?>",
-              "priceCurrency": "PLN",
-              "availability": "http://schema.org/InStock" 
+              "priceCurrency": "PLN"
+              <?php $pa = get_the_post_meta('_price_available'); if($pa == 'InStock' || $pa == 'PreOrder' || $pa == 'SoldOut'):?>,"availability": "http://schema.org/<?php echo $pa;?>"<?php endif;?>
               //"validFrom": "2017-01-20T16:20-08:00",
               //"url": "https://example.com"
             }
