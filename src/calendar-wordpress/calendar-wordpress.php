@@ -16,6 +16,7 @@ Author URI: https://github.com/hackerspace-silesia/
 require_once 'lib/calendar-event.php';
 require_once 'lib/location.php';
 require_once 'lib/host.php';
+require_once 'lib/calendar-widget.php';
 
 include 'config.php';
 
