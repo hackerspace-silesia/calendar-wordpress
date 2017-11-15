@@ -342,7 +342,11 @@ function add_tags_to_content($content){
         $content .= '<div class="price"><p>Cena biletu:<br/>'.get_the_post_meta('_event_price').' PLN</p></div>';
     }
     
-    /* @TODO: wykonawcy */
+    if ( get_the_post_meta('_performer_name') ) {
+        $content .= '<div class="performer"><p>Wykonawca:<br/>';
+        $content .= implode(', ', get_the_post_meta('_performer_name'));
+        $content .= '</p></div>';
+    }
     
     return $content;
 }
@@ -414,7 +418,7 @@ function posts_orderby( $query ) {
     $query->set('order','ASC');
     
     // tylko wydarzenia kończące się po "dzisiaj"
-    $today = date( 'Y/m/d 23:59' );
+    $today = date( 'Y/m/d 00:00' );
     $query->set('meta_query', array( array(
         'key' => '_event_stop',
         'value' => $today,
@@ -440,6 +444,8 @@ function modify_post_thumbnail_html($html, $post_id, $post_thumbnail_id, $size, 
 
 add_filter('the_content', 'add_structured_data_to_content', 5);
 function add_structured_data_to_content($content){
+    $performersNames = get_the_post_meta('_performer_name');
+    $performersTypes = get_the_post_meta('_performer_type');
     ?>
     <script type="application/ld+json">
         {
@@ -461,11 +467,16 @@ function add_structured_data_to_content($content){
             },
             "description": "<?php echo htmlspecialchars(strip_tags($content)); ?>",
             "image": "<?php $img = wp_get_attachment_image_src(get_post_thumbnail_id(), 'large'); echo $img[0];?>"
-            /* @TODO: wykonawcy *//*
-            "performer": {
-              "@type": "PerformingGroup", //lub "Person"
-              "name": "Ktośtam"
-            },*/
+            <?php if ( $performersNames ): ?>
+                ,"performer": [
+                    <?php $len = count($performersNames); foreach($performersNames as $key => $performerName): ?>
+                            {
+                                "@type": "<?php echo $performersTypes[$key]; ?>",
+                                "name": "<?php echo addslashes($performerName); ?>"
+                            }<?php if ($key != $len-1) {echo ',';} ?>
+                    <?php endforeach; ?>
+                ]
+            <?php endif; ?>
             <?php if(get_the_post_meta('_event_price') != '') : ?>
             ,"offers": {
               "@type": "Offer",
