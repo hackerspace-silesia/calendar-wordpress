@@ -272,20 +272,11 @@ add_action('save_post', 'calendar_save_postdata');
 
 function query_post_type($query) {
     if( $query->is_main_query() && !is_admin() ){
-        add_leaflet();
+        add_css();
+        //add_leaflet();
         $query->set( 'post_type', array( 'post', 'calendar_event' ) );
         // TODO: a może jednak paginacja?
         $query->set( 'posts_per_page', 1000 );
-        return $query;
-    }
-    if( $query->is_main_query() && $query->is_archive() && !is_admin() ) {
-        add_leaflet();
-        $query->set( 'post_type', array( 'post', 'calendar_event' ) );
-        return $query;
-    }
-    if( $query->is_main_query() && $query->is_single() && !is_admin() ) {
-        add_leaflet();
-        $query->set( 'post_type', array( 'post', 'calendar_event' ) );
         return $query;
     }
     return $query;
@@ -294,9 +285,12 @@ add_filter('pre_get_posts', 'query_post_type');
 
 function add_leaflet() {
     wp_enqueue_style( 'leaflet-css' , plugins_url('../assets/css/leaflet.css', __FILE__ ));
-    wp_enqueue_style( 'wp-calendarevents-css' , plugins_url('../assets/css/style.css', __FILE__ ));
     wp_enqueue_script( 'leaflet-js', plugins_url('../assets/js/leaflet.js', __FILE__ ));
     wp_enqueue_script( 'leaflet-color-markers-js', plugins_url('../assets/js/leaflet-color-markers.js', __FILE__ ));
+}
+
+function add_css(){
+    wp_enqueue_style( 'wp-calendarevents-css' , plugins_url('../assets/css/style.css', __FILE__ ));
 }
 
 add_filter('the_content', 'add_tags_to_content');

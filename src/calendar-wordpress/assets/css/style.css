@@ -1,0 +1,88 @@
+p.tags{
+    font-size: .8em;
+    color: gray;
+    clear: left;
+}
+
+p.tags a{
+    color: gray;
+    text-decoration: none;
+    border-bottom: none;
+}
+
+p.tags a:hover{
+    border-bottom: 1px solid orange;
+    color: orange;
+}
+
+.categories ul {
+    list-style-type: none;
+}
+
+.time{
+    font-weight: bold;
+}
+
+/* kalendarium w widgecie */
+
+.widget table.jc_table{
+    border: 1px solid #999;
+    margin-bottom: 5px;
+    width: 100%;
+    background-color: #f9f9f9;
+    line-height: 1.2;
+}
+
+span.jc_day{
+    font-size: 24px;
+    font-family: Arial;
+    font-weight: bold;
+    color: #666;
+}
+
+td.jc_date, div.jc_date{
+    text-align: center;
+    width: 40px;
+}
+
+div.jc_date{
+    float: right;
+}
+
+span.jc_month{
+    text-align: center;
+    font-weight: bold;
+    color: #666;
+}
+
+td.jc_subject{
+    text-align: center;
+    vertical-align: middle;
+    font-size: 80%;	
+}
+
+span.jc_subject{
+    display: block;
+    margin-top: 2px;
+}
+
+span.jc_time{
+    color: gray;
+    font-family: Verdana;
+    font-size: 9px;
+    border-bottom: 1px solid gray;
+}
+
+span.jc_sunday, div.jc_sunday{
+    color: #f55;
+}
+
+span.jc_saturday, div.jc_saturday{
+    color: #69C;
+}
+
+table.jc_pastEvent, div.jc_notThisMonth{
+    filter:alpha(opacity=50);
+    opacity: 0.5;
+    -moz-opacity:0.5;
+}
