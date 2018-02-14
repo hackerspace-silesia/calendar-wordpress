@@ -31,6 +31,7 @@ p.tags a:hover{
     width: 100%;
     background-color: #f9f9f9;
     line-height: 1.2;
+    font-family: "Noto Sans", sans-serif;
 }
 
 span.jc_day{
@@ -38,11 +39,12 @@ span.jc_day{
     font-family: Arial;
     font-weight: bold;
     color: #666;
+    white-space: nowrap;
 }
 
 td.jc_date, div.jc_date{
     text-align: center;
-    width: 40px;
+    width: 45px;
 }
 
 div.jc_date{
@@ -53,6 +55,7 @@ span.jc_month{
     text-align: center;
     font-weight: bold;
     color: #666;
+    white-space: nowrap;
 }
 
 td.jc_subject{

@@ -52,7 +52,7 @@ class calendar_widget extends WP_Widget {
                     else if (date('N',$time)==7){   echo '<span class="jc_day jc_sunday">';}
                     else {                          echo '<span class="jc_day">';}
                     
-                    echo date('d',$time).'</span><br/><span class="jc_month">'.$months[date('m',$time)].'</span>';
+                    echo date('d',$time).'</span><br/><span class="jc_month">'.$months[date('n',$time)].'</span>';
                     echo '</td><td class="jc_subject">';
                     echo '<a href="'.get_permalink().'">'; the_title(); echo '</a>';
                     echo '</td></tr>';

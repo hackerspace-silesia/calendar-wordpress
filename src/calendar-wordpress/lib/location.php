@@ -89,10 +89,6 @@ function metadata_metabox_location_html($post)
     <div id="map-location" style="height: 400px; width: 100%; float: left;"></div>
     <div class="metabox_right" style="float:right; width: 100%; text-align: right">
         <div>
-            <label for="location_alias">Alias lokalizacji</label>
-            <input type="text" id="location_alias" name="location_alias" value="<?php echo get_post_meta( $post->ID, '_location_alias', true ); ?>" />
-        </div>
-        <div>
             <label for="location_url">Adres (ulica)</label>
             <input type="text" id="location_address" name="location_address" value="<?php echo get_post_meta( $post->ID, '_location_address', true ); ?>" />
         </div>
@@ -165,11 +161,6 @@ function location_save_postdata($post_id)
     if(isset($_POST['location_url'])){
         $mydata = sanitize_text_field( $_POST['location_url'] );
         update_post_meta( $post_id, '_location_url', $mydata );
-    }
-    
-    if(isset($_POST['location_alias'])){
-        $mydata = sanitize_text_field( $_POST['location_alias'] );
-        update_post_meta( $post_id, '_location_alias', $mydata );
     }
     
     if(isset($_POST['location_lon'])){

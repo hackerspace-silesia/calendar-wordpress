@@ -86,10 +86,6 @@ function metadata_metabox_host_html($post)
     ?>
     <div class="metabox_right" style="float:right; width: 50%; text-align: right">
         <div>
-            <label for="host_alias">Alias organizatora: </label>
-            <input type="text" id="host_alias" name="host_alias" value="<?php echo get_post_meta( $post->ID, '_host_alias', true ); ?>" />
-        </div>
-        <div>
             <label for="host_url">Strona WWW organizatora: </label>
             <input type="text" id="host_url" name="host_url" value="<?php echo get_post_meta( $post->ID, '_host_url', true ); ?>" />
         </div>
@@ -136,11 +132,6 @@ function host_save_postdata($post_id)
     if(isset($_POST['host_url'])){
         $mydata = sanitize_text_field( $_POST['host_url'] );
         update_post_meta( $post_id, '_host_url', $mydata );
-    }
-    
-    if(isset($_POST['host_alias'])){
-        $mydata = sanitize_text_field( $_POST['host_alias'] );
-        update_post_meta( $post_id, '_host_alias', $mydata );
     }
     
     if(isset($_POST['locationalias'])){

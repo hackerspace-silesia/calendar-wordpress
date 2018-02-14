@@ -86,7 +86,6 @@ function metadata_metabox_html($post)
     $organisedby = get_post_meta($post->ID, '_organisedby', true);
     $price_availability = get_post_meta($post->ID, '_price_available', true);
     $performer_type = get_post_meta($post->ID, '_performer_type', true);
-    //print_r($performer_type); //die();
     ?>
     <div class="metabox">
         <div>
@@ -156,7 +155,7 @@ function metadata_metabox_html($post)
                     <option value="TheaterGroup" <?php selected($type, 'TheaterGroup'); ?> >Teatr</option>
                     <option value="Person" <?php selected($type, 'Person'); ?> >Inni</option>
                 </select>
-                <input type="text" class="performer_name" name="performer_name[]" value="<?php $pn = get_post_meta( $post->ID, '_performer_name', true ); echo $pn[$key]; ?>" />
+                <input type="text" class="performer_name" name="performer_name[]" value="<?php $pn = get_post_meta( $post->ID, '_performer_name', true ); echo htmlentities($pn[$key]); ?>" />
                 <a href="#" onclick="return deleteParentDiv(this);">Usuń powyższego wykonawcę</a>
             </div>
             <?php endforeach; ?>
