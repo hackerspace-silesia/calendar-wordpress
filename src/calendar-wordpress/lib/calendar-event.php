@@ -306,6 +306,7 @@ function add_bootstrap(){
     //wp_enqueue_script( 'bootstrap-select', plugins_url('../assets/js/bootstrap-select.min.js', __FILE__ ));
     
     wp_enqueue_style( 'chosen-css' , plugins_url('../assets/css/chosen.min.css', __FILE__ ));
+    wp_enqueue_style( 'admin-css' , plugins_url('../assets/css/admin-style.css', __FILE__ ));
     wp_enqueue_script( 'chosen-js', plugins_url('../assets/js/chosen.jquery.min.js', __FILE__ ));
 }
 
