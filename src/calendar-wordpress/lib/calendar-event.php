@@ -82,11 +82,13 @@ add_action('add_meta_boxes', 'create_metabox');
 function metadata_metabox_html($post)
 {
     wp_nonce_field('calendar_metabox_html', 'calendar_metabox_html_nonce');
+    add_bootstrap();
     $locationalias = get_post_meta($post->ID, '_locationalias', true);
     $organisedby = get_post_meta($post->ID, '_organisedby', true);
     $price_availability = get_post_meta($post->ID, '_price_available', true);
     $performer_type = get_post_meta($post->ID, '_performer_type', true);
     ?>
+
     <div class="metabox">
         <div>
             <label for="event_start">Początek wydarzenia: </label>
@@ -102,7 +104,7 @@ function metadata_metabox_html($post)
         </div>
         <div>
             <label for="organisedby">Organizator wydarzenia: </label>
-            <select name="organisedby" id="organisedby">
+            <select name="organisedby" id="organisedby" class="select" data-live-search="true">
             <?php
             //global $location;
             $args = array( 'post_type' => 'host', 'nopaging' => true );
@@ -114,6 +116,11 @@ function metadata_metabox_html($post)
             wp_reset_postdata();
             ?>
             </select>
+            <script>
+                jQuery( document ).ready(function() {
+                    jQuery(".select").chosen();
+                });
+            </script>
         </div>
         <div>
             <label for="event_price">Cena biletu: </label>
@@ -130,7 +137,7 @@ function metadata_metabox_html($post)
         </div>
         <div>
             <label for="locationalias">Nazwa lokalizacji: </label>
-            <select name="locationalias" id="locationalias">
+            <select name="locationalias" id="locationalias" class="select">
             <?php
             //global $location;
             $args = array( 'post_type' => 'location', 'nopaging' => true );
@@ -290,6 +297,16 @@ function add_leaflet() {
 
 function add_css(){
     wp_enqueue_style( 'wp-calendarevents-css' , plugins_url('../assets/css/style.css', __FILE__ ));
+}
+
+function add_bootstrap(){
+    //wp_enqueue_style( 'wp-bootstrap-select-css' , plugins_url('../assets/css/bootstrap-select.min.css', __FILE__ ));
+    //wp_enqueue_style( 'wp-bootstrap-css' , plugins_url('../assets/css/bootstrap.min.css', __FILE__ ));
+    //wp_enqueue_script( 'bootstrap', plugins_url('../assets/js/bootstrap.min.js', __FILE__ ));
+    //wp_enqueue_script( 'bootstrap-select', plugins_url('../assets/js/bootstrap-select.min.js', __FILE__ ));
+    
+    wp_enqueue_style( 'chosen-css' , plugins_url('../assets/css/chosen.min.css', __FILE__ ));
+    wp_enqueue_script( 'chosen-js', plugins_url('../assets/js/chosen.jquery.min.js', __FILE__ ));
 }
 
 add_filter('the_content', 'add_tags_to_content');
